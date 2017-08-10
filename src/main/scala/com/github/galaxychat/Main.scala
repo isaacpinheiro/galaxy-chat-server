@@ -11,6 +11,7 @@ case class Message(val nick: String, val content: String)
 case class Response(val content: String)
 case object ListUsers
 case class Nick(val oldNick: String, val newNick: String)
+case class Quit(val nick: String)
 
 class Server extends Actor {
 
@@ -44,6 +45,16 @@ class Server extends Actor {
           User(newNick, u.addr)
         } else {
           u
+        }
+      })
+    }
+
+    case Quit(nick) => {
+      users = users.foldLeft(List[User]())((res: List[User], u: User) => {
+        if (u.nick == nick) {
+          res
+        } else {
+          res ++ List(u)
         }
       })
     }
