@@ -9,7 +9,7 @@ case class User(val nick: String, val addr: ActorRef)
 case class Connection(val user: User)
 case class Message(val nick: String, val content: String)
 case class Response(val content: String)
-case class ListUsers(val nick: String)
+case object ListUsers
 
 class Server extends Actor {
 
@@ -24,17 +24,16 @@ class Server extends Actor {
 
     case Message(nick, content) => {
       val msg = nick + ": " + content
-      users.foreach((u: User) => { u.addr ! Response("\n" + msg + "\n") })
+      users.foreach((u: User) => { u.addr ! Response(msg + "\n") })
     }
 
-    case ListUsers(nick) => {
+    case ListUsers => {
 
       val msg = "\nUsers:\n" + users.foldLeft("")((res: String, u: User) => {
         res + u.nick + "\n"
       })
 
-      val addr = users.filter((u: User) => u.nick == nick).head.addr
-      addr ! Response(msg)
+      sender ! Response(msg)
 
     }
 
@@ -51,7 +50,7 @@ object Main {
     val system = ActorSystem("GalaxyChatServerSystem", config)
     val server = system.actorOf(Props[Server], name = "server")
 
-    println("\n\nGalaxy Chat Server")
+    println("\nGalaxy Chat Server")
     println("Waiting for incoming connections...")
 
   }
