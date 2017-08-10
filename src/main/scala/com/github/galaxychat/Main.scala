@@ -10,6 +10,7 @@ case class Connection(val user: User)
 case class Message(val nick: String, val content: String)
 case class Response(val content: String)
 case object ListUsers
+case class Nick(val oldNick: String, val newNick: String)
 
 class Server extends Actor {
 
@@ -35,6 +36,16 @@ class Server extends Actor {
 
       sender ! Response(msg)
 
+    }
+
+    case Nick(oldNick, newNick) => {
+      users = users.map((u: User) => {
+        if (u.nick == oldNick) {
+          User(newNick, u.addr)
+        } else {
+          u
+        }
+      })
     }
 
   }
